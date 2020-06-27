@@ -1,0 +1,12 @@
+{
+  "manifest_version": 2,
+  "name": "pda Extension",
+  "version": "0.1",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*"],
+      "js": ["jquery-3.5.1.min.js","contentScript.js"]
+    }
+  ]
+}
