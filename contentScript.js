@@ -1,163 +1,6 @@
 //contentScript.js
-const token = "08466fb6e7ba5645945bed70f2fd8bc9d943be92";
-
-async function getIssueMetadata($issueRow) {
-    const issueId = $issueRow.attr('id').split("_")[1];
-    const data = await getIssue(issueId);
-    const metadata = parseBody(data.body);
-
-    $issueRow.data('issueId', issueId);
-    $issueRow.data('body', data.body);
-    $issueRow.data('metadata', metadata);
-
-    calculateTotals();
-
-    $issueRow.find(".estimated").val(metadata.estimated);
-    $issueRow.find(".done").val(metadata.done);
-}
-
-function parseBody(body) {
-    const $wrapper = $("<div></div>").append(body);
-    let $text = $wrapper.find("#issue-metadata");
-    if ($text.length == 0) {
-        $wrapper.append("\n\n\n<!-- Issue Metadata -->\n")
-        $text = $('<input id="issue-metadata" type="hidden">').appendTo($wrapper);
-    }
-
-    let initialMeta = {
-        estimated: '',
-        done: '0'
-    };
-
-    try {
-        obj = JSON.parse($text.val());
-        initialMeta = {...initialMeta, ...obj};
-    } catch (e) {
-
-    }
-
-    return initialMeta;
-}
-
-function setIssueMetadata($issueRow) {
-    const issueId = $issueRow.data("issueId");
-    const body = $issueRow.data("body");
-    const metadata = $issueRow.data("metadata");
-
-    const $wrapper = $("<div></div>").append(body);
-    let $text = $wrapper.find("#issue-metadata");
-    if ($text.length == 0) {
-        $wrapper.append("\n\n\n<!-- Issue Metadata -->\n")
-        $text = $('<input id="issue-metadata" type="hidden">').appendTo($wrapper);
-    }
-
-    $text.attr("value", JSON.stringify(metadata));
-    updateIssue(issueId, $wrapper.html());
-    calculateTotals();
-}
-
-async function getIssue(id) {
-    let result = null;
-
-    try {
-        result = await $.ajax({
-            url: 'https://api.github.com/repos/RFAssurance/TechInsights3/issues/' + id,
-            dataType: 'json',
-            type: 'GET',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", "token " + token);
-            },
-            success: function (data) {
-                //console.log(data);
-            },
-            error: function (data) {
-                //console.log(data);
-            }
-        });
-    } catch (e) {
-        console.log(e);
-    }
-
-    return result;
-}
-
-function updateIssue(id, body) {
-    $.ajax({
-        url: "https://api.github.com/repos/RFAssurance/TechInsights3/issues/" + id,
-        type: "POST",
-        beforeSend: function (xhr) {
-            xhr.setRequestHeader("Authorization", "token " + token);
-        },
-        data: JSON.stringify({
-            body: body
-        })
-    })
-}
-
-
-function calculateTotals() {
-    estimatedTotal = 0;
-    estimatedDone = 0;
-
-    var fnHR=function(value) {
-        var units = {
-            "year": 8 * 5 * 4 * 12,
-            "month": 8 * 5 * 4,
-            "week": 8 * 5,
-            "day": 8,
-            "hour": 1
-        }
-
-        var result = []
-
-        for (var name in units) {
-            var p = Math.floor(value / units[name]);
-            if (p == 1) result.push(p + " " + name);
-            if (p >= 2) result.push(p + " " + name + "s");
-            value %= units[name]
-        }
-
-        return result;
-    }
-
-    $(".js-issue-row").each(function (index) {
-        const metadata = $(this).data('metadata');
-        if (metadata !=null) {
-            estimatedDone += parseInt(metadata.done);
-            const arr = metadata.estimated.split("-");
-            let number = parseInt(arr[0]);
-            const numberType = arr[1];
-
-            switch (numberType) {
-                case 'hour':
-                    estimatedTotal += number;
-                    break
-                case 'day':
-                    estimatedTotal += number * 8;
-                    break
-                case 'week':
-                    estimatedTotal += number * 40;
-                    break
-                case 'month':
-                    estimatedTotal += number * 40 * 4;
-                    break
-            }
-        }
-    });
-
-    const percent=(estimatedDone/$(".js-issue-row").length);
-    const html=`<div><b>Estimated</b></div>
-                <div>${fnHR(estimatedTotal).join(" ")}</div>
-                <div class="mt-2"><b>Done</b></div>
-                <div>${percent.toFixed(0)}%</div>
-                <div class="progress-bar progress-bar-small"><span class="progress" style="width: ${percent}%">&nbsp;</span></div>`
-
-    $(".estimated-totals").html(html);
-}
-
-const html = `
-            <div class="py-2 pl-3" style="width:150px;">
-                <div class="mb-1">
+const html = `<div class="py-2 pl-3 controls-container" style="width:150px;">
+                <div class="estimated-container">
                     <select class="form-control input-sm d-block estimated" style="width:120px;" title="Estimated Time">
                     <option value="">(none)</option>
                       <optgroup label="Hours">
@@ -189,7 +32,7 @@ const html = `
                       </optgroup>                      
                     </select>                
                 </div>
-                <div>
+                <div class="done-container mt-1">
                     <select class="form-control input-sm d-block done"  style="width:120px;" title="% Done">
                         <option value="0">0%</option>
                         <option value="10">10%</option>
@@ -206,33 +49,271 @@ const html = `
                 </div>
             </div>`;
 
-const html2 = `<div><div class="d-flex flex-column col-12 col-sm-3 p-2 border border-gray-dark rounded-1 mb-3 mt-3 estimated-totals" style="margin-left: auto"></div></div>`;
+const issuesEnhancer = {
+    token: null,
+    username: null,
+    repository: null,
+    displayOverview: true,
+    displayEstimatedTime: true,
+    displayDone: true,
+    getIssueId($issueRow) {
+        const arr = $issueRow.attr('id').split("_");
+        if (arr.length == 2)
+            return arr[1];
 
-$('.repository-content .Box').before(html2);
-//$('.repository-content .Box .Box-header').append('<div style="width: 150px;"></div>');
+        return null;
+    },
+    async getIssueMetadata($issueRow) {
+        const issueId = this.getIssueId($issueRow);
+        if (issueId == null)
+            return;
 
-$(".js-issue-row").each(function (index) {
-    const $this = $(this);
-    $this.find(" .Box-row--drag-hide").append(html);
-    getIssueMetadata($this);
-});
+        const data = await this.getIssue(issueId);
+        const metadata = this.parseBody(data.body);
+
+        //Fill data
+        $issueRow.data('issueId', issueId);
+        $issueRow.data('body', data.body);
+        $issueRow.data('metadata', metadata);
+
+        this.calculateTotals();
+
+        // Fill controls
+        $issueRow.find(".estimated").val(metadata.estimated);
+        $issueRow.find(".done").val(metadata.done);
+    },
+    parseBody(body) {
+        const $wrapper = $("<div></div>").append(body);
+
+        let metadata = null;
+
+        $wrapper.contents().filter(function () {
+            return this.nodeType == 8 && this.nodeValue.startsWith("GitHubIssuesEnhancements=");
+        }).each(function (i, e) {
+            const json = e.nodeValue.replace("GitHubIssuesEnhancements=", "").trim();
+            try {
+                obj = JSON.parse(json);
+                metadata = {
+                    ...{
+                        estimated: '',
+                        done: '0'
+                    }, ...obj
+                };
+            } catch (e) {
+                console.log(e);
+            }
+        });
+
+        if (metadata == null) {
+            metadata = {estimated: '', done: '0'}
+            $wrapper.append('\n\n\n<!--GitHubIssuesEnhancements={"estimated":"", "done":"0"}-->')
+        }
+
+        return metadata;
+    },
+    setIssueMetadata($issueRow) {
+        const issueId = $issueRow.data("issueId");
+        const body = $issueRow.data("body");
+        const metadata = $issueRow.data("metadata");
+
+        const $wrapper = $("<div></div>").append(body);
+
+        let found = false;
+        $wrapper.contents().filter(function () {
+            return this.nodeType == 8 && this.nodeValue.startsWith("GitHubIssuesEnhancements=");
+        }).each(function (i, e) {
+            found = true;
+            e.nodeValue = "GitHubIssuesEnhancements=" + JSON.stringify(metadata);
+        });
+
+        if (!found)
+            $wrapper.append('\n\n\n<!--GitHubIssuesEnhancements={"estimated":"", "done":"0"}-->')
+
+        this.updateIssue(issueId, $wrapper.html());
+        this.calculateTotals();
+    },
+    async getIssue(id) {
+        let result = null;
+        const self = this;
+        try {
+            result = await $.ajax({
+                url: `https://api.github.com/repos/${self.username}/${self.repository}/issues/${id}`,
+                dataType: 'json',
+                type: 'GET',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "token " + self.token);
+                },
+                success: function (data) {
+                    //console.log(data);
+                },
+                error: function (data) {
+                    //console.log(data);
+                }
+            });
+        } catch (e) {
+            console.log(e);
+        }
+
+        return result;
+    },
+    updateIssue(id, body) {
+        const self = this;
+        $.ajax({
+            url: `https://api.github.com/repos/${self.username}/${self.repository}/issues/${id}`,
+            type: "POST",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", "token " + self.token);
+            },
+            data: JSON.stringify({
+                body: body
+            })
+        })
+    },
+    calculateTotals() {
+        estimatedTotal = 0;
+        estimatedDone = 0;
+
+        var fnHR = function (value) {
+            var units = {
+                "year": 8 * 5 * 4 * 12,
+                "month": 8 * 5 * 4,
+                "week": 8 * 5,
+                "day": 8,
+                "hour": 1
+            }
+
+            var result = []
+
+            for (var name in units) {
+                var p = Math.floor(value / units[name]);
+                if (p == 1) result.push(p + " " + name);
+                if (p >= 2) result.push(p + " " + name + "s");
+                value %= units[name]
+            }
+
+            if (result.length == 0)
+                return "(none)";
+            else
+                return result.join(" ")
+        }
+
+        $(".js-issue-row").each(function (index) {
+            const metadata = $(this).data('metadata');
+            if (metadata != null) {
+                estimatedDone += parseInt(metadata.done);
+                const arr = metadata.estimated.split("-");
+                let number = parseInt(arr[0]);
+                const numberType = arr[1];
+
+                switch (numberType) {
+                    case 'hour':
+                        estimatedTotal += number;
+                        break
+                    case 'day':
+                        estimatedTotal += number * 8;
+                        break
+                    case 'week':
+                        estimatedTotal += number * 40;
+                        break
+                    case 'month':
+                        estimatedTotal += number * 40 * 4;
+                        break
+                }
+            }
+        });
+
+        const percent = (estimatedDone / $(".js-issue-row").length);
+        const html = `<div><b>Estimated</b></div>
+                <div>${fnHR(estimatedTotal)}</div>
+                <div class="mt-2"><b>Done</b></div>
+                <div>${percent.toFixed(0)}%</div>
+                <div class="progress-bar progress-bar-small"><span class="progress" style="width: ${percent}%">&nbsp;</span></div>`
+
+        $(".estimated-totals").html(html);
+    },
+    init() {
+        const self = this;
+        const htmlOverview = $(`<div class="estimated-time-overview">
+                            <div class="d-flex bg-gray flex-column col-12 col-sm-3 p-2 border border-gray-dark rounded-1 mb-3 mt-3" style="margin-left: auto">
+                                   <!--<div class="mb-3"><h4>GitHub Issues Enhancements</h4></div>-->
+                                   <div class="estimated-totals mb-2">No issues found</div>
+                                   <div><input type="checkbox" id="displayEstimatedTime"> <label for="displayEstimatedTime">Show estimated time</label></div>
+                                   <div><input type="checkbox" id="displayDone"> <label for="displayDone">Show % done</label></div>
+                            </div>
+                       </div>`);
+
+        if (!self.displayOverview) htmlOverview.addClass("d-none");
+
+        $('.repository-content .Box').before(htmlOverview);
+        //$('.repository-content .Box .Box-header').append('<div style="width: 150px;"></div>');
+
+        $(".js-issue-row").each(function (index) {
+            const $this = $(this);
+            const $controls = $(html);
+
+            $(".controls-container", $controls).toggleClass("d-none", !self.displayDone && !self.displayEstimatedTime);
+            $(".estimated-container", $controls).toggleClass("d-none", !self.displayEstimatedTime);
+            $(".done-container", $controls).toggleClass("d-none", !self.displayDone);
+
+            $this.find(" .Box-row--drag-hide").append($controls);
+            self.getIssueMetadata($this);
+        });
+
+        $("#displayDone, #displayEstimatedTime").change(function () {
+            chrome.storage.sync.set({
+                "displayEstimatedTime": $("#displayEstimatedTime").prop('checked'),
+                "displayDone": $("#displayDone").prop('checked')
+            }, function () {
+                if (chrome.runtime.error) {
+                    console.log("Runtime error");
+                }
+            });
+
+            $(".controls-container").toggleClass("d-none", (!$("#displayDone").prop('checked') && !$("#displayEstimatedTime").prop('checked')));
+            $(".estimated-container").toggleClass("d-none", (!$("#displayEstimatedTime").prop('checked')));
+            $(".done-container").toggleClass("d-none", (!$("#displayDone").prop('checked')));
+        });
 
 
+        $(".estimated").change(function (e) {
+            const $this = $(this);
+            const $issueRow = $this.closest(".js-issue-row");
+            const metadata = $issueRow.data("metadata");
 
-$(".estimated").change(function (e) {
-    const $this = $(this);
-    const $issueRow = $this.closest(".js-issue-row");
-    const metadata = $issueRow.data("metadata");
+            metadata.estimated = $this.val()
+            self.setIssueMetadata($issueRow);
+        });
 
-    metadata.estimated = $this.val()
-    setIssueMetadata($issueRow);
-});
+        $(".done").change(function (e) {
+            const $this = $(this);
+            const $issueRow = $this.closest(".js-issue-row");
+            const metadata = $issueRow.data("metadata");
 
-$(".done").change(function (e) {
-    const $this = $(this);
-    const $issueRow = $this.closest(".js-issue-row");
-    const metadata = $issueRow.data("metadata");
+            metadata.done = $this.val()
+            self.setIssueMetadata($issueRow);
+        });
+    },
+    beforeInit() {
+        const self = this;
+        const arr = window.location.pathname.split("/");
 
-    metadata.done = $this.val()
-    setIssueMetadata($issueRow);
-});
+        if (arr.length < 3) return;
+        this.username = arr[1];
+        this.repository = arr[2];
+
+        // Read it using the storage API
+        chrome.storage.sync.get(['personalAccessToken', 'displayOverview', 'displayEstimatedTime', 'displayDone'], function (items) {
+            self.token = items.personalAccessToken;
+            self.displayDone = items.displayDone;
+            self.displayEstimatedTime = items.displayEstimatedTime;
+            self.displayOverview = items.displayOverview;
+            self.init();
+
+            $("#displayDone").prop('checked', self.displayDone)
+            $("#displayEstimatedTime").prop('checked', self.displayEstimatedTime);
+        });
+    }
+}
+
+
+issuesEnhancer.beforeInit();

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Test Extension Options</title>
+</head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+<body>
+
+<div class="container mt-4">
+    <div class="form-group">
+        <label>GitHub Personal Access Token</label>
+        <input id="personalAccessToken" class="form-control" type="text" placeholder="Personal Access Token"/>
+        <small class="form-text text-muted">Please supply your GitHub <a href="https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token" target="_blank">Personal Access Token</a> in order to be able the chrome extension to write issue metadata</small>
+    </div>
+
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="displayOverview">
+        <label class="form-check-label" for="displayOverview">
+            Display overview
+        </label>
+    </div>
+
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="displayEstimatedTime">
+        <label class="form-check-label" for="displayEstimatedTime">
+            Display estimated time on issues
+        </label>
+    </div>
+
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="displayDone">
+        <label class="form-check-label" for="displayDone">
+            Display % done on issues
+        </label>
+    </div>
+
+    <div id="status" class="py-2 text-success"></div>
+    <div class="form-group mt-3">
+        <button id="save" class="btn btn-primary">Save</button>
+    </div>
+</div>
+
+<script src="options.js"></script>
+</body>
+</html>
