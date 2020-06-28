@@ -35,3 +35,14 @@ function restore_options() {
 
 document.addEventListener('DOMContentLoaded', restore_options);
 document.getElementById('save').addEventListener('click', save_options);
+document.getElementById('showHide').addEventListener('click', function(){
+    var x = document.getElementById("personalAccessToken");
+    if (x.type === "password") {
+        document.getElementById('showHide').innerText="Hide";
+        x.type = "text";
+    } else {
+        document.getElementById('showHide').innerText="Show"
+        x.type = "password";
+    }
+
+});

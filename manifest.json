@@ -1,10 +1,11 @@
 {
   "manifest_version": 2,
   "name": "GitHub Issues Enhancements",
+  "description": "Chrome Extension to capture estimated time and % done for Github issues",
   "version": "1.0",
   "icons": {
-    "48": "icon_48.png",
-    "128": "icon_128.png"
+    "48": "48.png",
+    "128": "128.png"
   },
   "options_ui": {
     "page": "options.html",
@@ -13,8 +14,9 @@
   "permissions": ["storage","activeTab"],
   "content_scripts": [
     {
-      "matches": ["*://github.com/*/*/issues*","*://github.com/*/*/labels/*","*://github.com/*/*/milestones/*"],
-      "js": ["jquery-3.5.1.min.js","contentScript.js"]
+      "matches": ["*://github.com/*/*/issues","*://github.com/*/*/issues?*","*://github.com/*/*/labels/*","*://github.com/*/*/milestones/*","*://github.com/*/*/milestone/*"],
+      "js": ["jquery-3.5.1.min.js","contentScript.js"],
+      "run_at": "document_idle"
     }
   ]
 }

@@ -1,7 +1,7 @@
 //contentScript.js
 const html = `<div class="py-2 pl-3 controls-container" style="width:150px;">
-                <div class="estimated-container">
-                    <select class="form-control input-sm d-block estimated" style="width:120px;" title="Estimated Time">
+                <div class="estimated-container">   
+                    <select class="form-select select-sm d-block estimated" style="width:120px;" title="Estimated Time">
                     <option value="">(none)</option>
                       <optgroup label="Hours">
                         <option value="1-hour">1 Hour </option>
@@ -33,7 +33,7 @@ const html = `<div class="py-2 pl-3 controls-container" style="width:150px;">
                     </select>                
                 </div>
                 <div class="done-container mt-1">
-                    <select class="form-control input-sm d-block done"  style="width:120px;" title="% Done">
+                    <select class="form-select select-sm d-block done"  style="width:120px;" title="% Done">
                         <option value="0">0%</option>
                         <option value="10">10%</option>
                         <option value="20">20%</option>
@@ -234,9 +234,9 @@ const issuesEnhancer = {
     init() {
         const self = this;
         const htmlOverview = $(`<div class="estimated-time-overview">
-                            <div class="d-flex bg-gray flex-column col-12 col-sm-3 p-2 border border-gray-dark rounded-1 mb-3 mt-3" style="margin-left: auto">
+                            <div class="d-flex flex-column col-12 col-sm-3 p-2 border border-gray-dark rounded-1 mb-3 mt-3" style="margin-left: auto">
                                    <!--<div class="mb-3"><h4>GitHub Issues Enhancements</h4></div>-->
-                                   <div class="estimated-totals mb-2">No issues found</div>
+                                   <div class="estimated-totals mb-2"></div>
                                    <div><input type="checkbox" id="displayEstimatedTime"> <label for="displayEstimatedTime">Show estimated time</label></div>
                                    <div><input type="checkbox" id="displayDone"> <label for="displayDone">Show % done</label></div>
                             </div>
@@ -255,7 +255,7 @@ const issuesEnhancer = {
             $(".estimated-container", $controls).toggleClass("d-none", !self.displayEstimatedTime);
             $(".done-container", $controls).toggleClass("d-none", !self.displayDone);
 
-            $this.find(" .Box-row--drag-hide").append($controls);
+            $this.find(".Box-row--drag-hide").append($controls);
             self.getIssueMetadata($this);
         });
 
@@ -315,5 +315,5 @@ const issuesEnhancer = {
     }
 }
 
-
+console.log('loaded');
 issuesEnhancer.beforeInit();

@@ -9,7 +9,12 @@
 <div class="container mt-4">
     <div class="form-group">
         <label>GitHub Personal Access Token</label>
-        <input id="personalAccessToken" class="form-control" type="text" placeholder="Personal Access Token"/>
+        <div class="input-group">
+            <input id="personalAccessToken" type="password" class="form-control" placeholder="Personal Access Token" aria-label="Personal Access Token">
+            <div class="input-group-append">
+                <button id="showHide" class="btn btn-secondary" type="button">Show</button>
+            </div>
+        </div>
         <small class="form-text text-muted">Please supply your GitHub <a href="https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token" target="_blank">Personal Access Token</a> in order to be able the chrome extension to write issue metadata</small>
     </div>
 
