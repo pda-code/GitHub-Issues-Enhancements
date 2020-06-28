@@ -11,7 +11,7 @@
     "page": "options.html",
     "open_in_tab": false
   },
-  "permissions": ["storage","activeTab"],
+  "permissions": ["storage"],
   "content_scripts": [
     {
       "matches": ["*://github.com/*/*/issues","*://github.com/*/*/issues?*","*://github.com/*/*/labels/*","*://github.com/*/*/milestones/*","*://github.com/*/*/milestone/*"],
