@@ -315,5 +315,4 @@ const issuesEnhancer = {
     }
 }
 
-console.log('loaded');
 issuesEnhancer.beforeInit();
