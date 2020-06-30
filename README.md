@@ -6,6 +6,10 @@ This chrome extension offers three more options when browsing GitHub issues on G
 - Tracks Completion Percent for each issue
 - Summary of the Estimated Time and Completion Percent of all issues currently displayed on screen
 
+# Installation
+Just go to [Chrome extension page](https://chrome.google.com/webstore/detail/github-issues-enhancement/edbnbdnankneabigcimhnnclaonogcep) and install the extension
+
+
 # Full Story
 Read the full story on [DEV.TO](https://dev.to/pda_code/github-issues-enhancements-a-chrome-extension-2kkb)
 
