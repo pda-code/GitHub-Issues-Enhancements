@@ -9,7 +9,7 @@ This chrome extension offers three more options when browsing GitHub issues on G
 # Full Story
 Read the full story on [DEV.TO](https://dev.to/pda_code/github-issues-enhancements-a-chrome-extension-2kkb)
 
-# Presenation
+# Presentation
 ![On Action](https://dev-to-uploads.s3.amazonaws.com/i/lat7l3w0uq02azb06t30.gif)
 
 # License
