@@ -1,5 +1,5 @@
 # Github Issues Enhacements
-Chrome Extension to capture estimated time and % done for Github issues
+A Chrome Extension that captures estimated time and % done for Github issues
 
 This chrome extension offers three more options when browsing GitHub issues on GitHub
 - Tracks Estimated time for each issue in Hours/Days/Weeks/Months
