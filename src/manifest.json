@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "GitHub Issues Enhancements",
   "description": "Chrome Extension to capture estimated time and % done for Github issues",
-  "version": "1.0",
+  "version": "1.1",
   "icons": {
     "48": "48.png",
     "128": "128.png"
