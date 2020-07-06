@@ -71,6 +71,7 @@ const issuesEnhancer = {
         const data = await this.getIssue(issueId);
         const metadata = this.parseBody(data.body);
 
+
         //Fill data
         $issueRow.data('issueId', issueId);
         $issueRow.data('body', data.body);
@@ -198,9 +199,17 @@ const issuesEnhancer = {
         }
 
         $(".js-issue-row").each(function (index) {
-            const metadata = $(this).data('metadata');
+            const $this=$(this);
+            const metadata = $this.data('metadata');
+
             if (metadata != null) {
                 estimatedDone += parseInt(metadata.done);
+
+                if (metadata.estimated!='')
+                    $this.find(".estimated").css({"background-color":"#E1EFFF","border-color":"#2B9FFF", "box-shadow":"none"})
+                else
+                    $this.find(".estimated").css({"background-color":"","border-color":"", "color":"", "box-shadow":""})
+
                 const arr = metadata.estimated.split("-");
                 let number = parseInt(arr[0]);
                 const numberType = arr[1];
